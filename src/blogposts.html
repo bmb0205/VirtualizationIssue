@@ -1,13 +1,18 @@
 <template>
+    <require from="./filter"></require>
     <div class="blog">
-        <table style="height: 500px; width: 300px; border: 1px solid black; overflow-y: scroll; display: block;">
-            <tr virtual-repeat.for="photo of photos">
+        <table style="height: 500px; width: 500px; border: 1px solid black; overflow-y: scroll; display: block;">
+            <tr repeat.for="todo of todos | filter:completed.value | filterTwo:title.value | filterThree:id.value">
                 <td>
-                    <p>${$index} : ${photo.title}</p>
-                    <img class="colors" src="${photo.url}" width="50px" />
+                    <p>${$index} : ${todo.title}</p>
+                    <p>${todo.id}</p>
+                    <p>${todo.completed}</p>
                     <hr class="featurette-divider blog-divider">
                 </td>
             </tr>
         </table>
     </div>
+    <button type="button" ref="completed" value="" click.delegate="propOneSelected(completed)">${completed.value}</button>
+    <button type="button" ref="title" value="" click.delegate="propTwoSelected(title)">${title.value}</button>
+    <button type="button" ref="id" value="" click.delegate="propThreeSelected(id)">${id.value}</button>
 </template>

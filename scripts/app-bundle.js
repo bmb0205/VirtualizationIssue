@@ -7614,8 +7614,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 define('blogposts',["require", "exports", 'aurelia-framework', 'aurelia-fetch-client', './repo'], function (require, exports, aurelia_framework_1, aurelia_fetch_client_1, repo_1) {
     "use strict";
     var Blogposts = (function () {
-        function Blogposts(photos, localData, http, repo) {
-            this.photos = photos;
+        function Blogposts(todos, localData, http, repo) {
+            this.todos = todos;
             this.localData = localData;
             this.http = http;
             this.repo = repo;
@@ -7644,10 +7644,49 @@ define('blogposts',["require", "exports", 'aurelia-framework', 'aurelia-fetch-cl
                 });
             });
             this.http = http;
+            this.count = 0;
         }
         Blogposts.prototype.created = function () {
-            this.photos = this.localData.slice(0, 100);
+            var _this = this;
+            return this.http.fetch('todos')
+                .then(function (response) { return response.json(); })
+                .then(function (data) {
+                _this.todos = data.slice(0, 100);
+                console.log(_this.todos.length);
+                _this.count = _this.todos.length;
+            })
+                .catch(function (ex) {
+                console.log(ex);
+            });
         };
+        Blogposts.prototype.propOneSelected = function (completed) {
+            if (completed.value) {
+                completed.value = '';
+            }
+            else {
+                completed.value = 'completed';
+            }
+        };
+        Blogposts.prototype.propTwoSelected = function (title) {
+            if (title.value) {
+                title.value = '';
+            }
+            else {
+                title.value = 'title';
+            }
+        };
+        Blogposts.prototype.propThreeSelected = function (id) {
+            if (id.value) {
+                id.value = '';
+            }
+            else {
+                id.value = 'id';
+            }
+        };
+        __decorate([
+            aurelia_framework_1.bindable, 
+            __metadata('design:type', Object)
+        ], Blogposts.prototype, "count", void 0);
         Blogposts = __decorate([
             aurelia_framework_1.autoinject, 
             __metadata('design:paramtypes', [Array, Array, aurelia_fetch_client_1.HttpClient, repo_1.repo])
@@ -7696,7 +7735,59 @@ define('resources/index',["require", "exports"], function (require, exports) {
     exports.configure = configure;
 });
 
+define('filter',["require", "exports"], function (require, exports) {
+    "use strict";
+    var FilterValueConverter = (function () {
+        function FilterValueConverter() {
+        }
+        FilterValueConverter.prototype.toView = function (array, propOne) {
+            if (propOne) {
+                return array.filter(function (todo) {
+                    return todo[propOne] === false;
+                });
+            }
+            else {
+                return array;
+            }
+        };
+        return FilterValueConverter;
+    }());
+    exports.FilterValueConverter = FilterValueConverter;
+    var FilterTwoValueConverter = (function () {
+        function FilterTwoValueConverter() {
+        }
+        FilterTwoValueConverter.prototype.toView = function (array, propTwo) {
+            if (propTwo) {
+                return array.filter(function (todo) {
+                    return todo[propTwo] === 'fugiat veniam minus';
+                });
+            }
+            else {
+                return array;
+            }
+        };
+        return FilterTwoValueConverter;
+    }());
+    exports.FilterTwoValueConverter = FilterTwoValueConverter;
+    var FilterThreeValueConverter = (function () {
+        function FilterThreeValueConverter() {
+        }
+        FilterThreeValueConverter.prototype.toView = function (array, propThree) {
+            if (propThree) {
+                return array.filter(function (todo) {
+                    return todo[propThree] === 2;
+                });
+            }
+            else {
+                return array;
+            }
+        };
+        return FilterThreeValueConverter;
+    }());
+    exports.FilterThreeValueConverter = FilterThreeValueConverter;
+});
+
 define('text!app.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./styles.css\"></require>\n  <require from=\"./blogposts\"></require>\n  <blogposts></blogposts>\n</template>\n"; });
-define('text!styles.css', ['module'], function(module) { module.exports = ".blog {\n    overflow-y: scroll;\n    overflow-x: scroll;\n    height: 500px;\n}"; });
-define('text!blogposts.html', ['module'], function(module) { module.exports = "<template>\n    <div class=\"blog\">\n        <table style=\"height: 500px; width: 300px; border: 1px solid black; overflow-y: scroll; display: block;\">\n            <tr virtual-repeat.for=\"photo of photos\">\n                <td>\n                    <p>${$index} : ${photo.title}</p>\n                    <img class=\"colors\" src=\"${photo.url}\" width=\"50px\" />\n                    <hr class=\"featurette-divider blog-divider\">\n                </td>\n            </tr>\n        </table>\n    </div>\n</template>"; });
+define('text!styles.css', ['module'], function(module) { module.exports = ".blog {\n    overflow-y: scroll;\n    overflow-x: scroll;\n    height: 500px;\n}\n\nbutton {\n    width: 100px;\n    height: 50px;\n}"; });
+define('text!blogposts.html', ['module'], function(module) { module.exports = "<template>\n    <require from=\"./filter\"></require>\n    <div class=\"blog\">\n        <table style=\"height: 500px; width: 500px; border: 1px solid black; overflow-y: scroll; display: block;\">\n            <tr repeat.for=\"todo of todos | filter:completed.value | filterTwo:title.value | filterThree:id.value\">\n                <td>\n                    <p>${$index} : ${todo.title}</p>\n                    <p>${todo.id}</p>\n                    <p>${todo.completed}</p>\n                    <hr class=\"featurette-divider blog-divider\">\n                </td>\n            </tr>\n        </table>\n    </div>\n    <button type=\"button\" ref=\"completed\" value=\"\" click.delegate=\"propOneSelected(completed)\">${completed.value}</button>\n    <button type=\"button\" ref=\"title\" value=\"\" click.delegate=\"propTwoSelected(title)\">${title.value}</button>\n    <button type=\"button\" ref=\"id\" value=\"\" click.delegate=\"propThreeSelected(id)\">${id.value}</button>\n</template>"; });
 //# sourceMappingURL=app-bundle.js.map
